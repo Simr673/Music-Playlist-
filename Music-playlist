@@ -1,0 +1,74 @@
+CREATE DATABASE IF NOT EXISTS MusicOrganizer;
+USE MusicOrganizer;
+-- Create ARTISTS table
+CREATE TABLE IF NOT EXISTS artists (
+    artist_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS songs (
+    song_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    artist_id INT NOT NULL,
+    duration TIME,
+    genre VARCHAR(50),
+    FOREIGN KEY (artist_id) REFERENCES artists(artist_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE IF NOT EXISTS playlists (
+    playlist_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS playlist_songs (
+    playlist_id INT,
+    song_id INT,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (playlist_id, song_id),
+    FOREIGN KEY (playlist_id) REFERENCES playlists(playlist_id) ON DELETE CASCADE,
+    FOREIGN KEY (song_id) REFERENCES songs(song_id) ON DELETE CASCADE
+);
+
+INSERT INTO artists (name) VALUES 
+('Taylor Swift'), 
+('Coldplay'), 
+('Ed Sheeran');
+
+
+INSERT INTO songs (title, artist_id, duration, genre) VALUES
+('Lover', 1, '00:03:45', 'Pop'),
+('Yellow', 2, '00:04:26', 'Alternative Rock'),
+('Shape of You', 3, '00:03:54', 'Pop');
+
+
+INSERT INTO playlists (name) VALUES 
+('Morning Vibes'), 
+('Workout Mix');
+
+-- Add SONGS to PLAYLISTS
+INSERT INTO playlist_songs (playlist_id, song_id) VALUES 
+(1, 1), 
+(1, 2), 
+(2, 3); 
+
+SELECT p.name AS playlist, s.title AS song, a.name AS artist
+FROM playlist_songs ps
+JOIN playlists p ON ps.playlist_id = p.playlist_id
+JOIN songs s ON ps.song_id = s.song_id
+JOIN artists a ON s.artist_id = a.artist_id
+WHERE p.name = 'Morning Vibes';
+
+SELECT p.name AS playlist_name
+FROM playlist_songs ps
+JOIN playlists p ON ps.playlist_id = p.playlist_id
+JOIN songs s ON ps.song_id = s.song_id
+WHERE s.title = 'Yellow';
+SELECT p.name, COUNT(ps.song_id) AS song_count
+FROM playlists p
+LEFT JOIN playlist_songs ps ON p.playlist_id = ps.playlist_id
+GROUP BY p.name;
+
+
